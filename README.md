@@ -11,7 +11,7 @@
 打开 `run.py`，找到顶部【配置区】，填入 5 行：
 
 ```python
-DASHSCOPE_API_KEY = "sk-xxxxxxxx"           # 通义千问 API
+DASHSCOPE_API_KEY = "sk-xxxxxxxx"           # LLM的 API
 SMTP_USERNAME     = "your@email.com"        # 发件邮箱
 SMTP_PASSWORD     = "smtp_auth_code"       # SMTP 授权码（非登录密码）
 recipients        = ["your@email.com"]      # 收件人
@@ -42,7 +42,7 @@ python run.py --no-github  # 仅发邮件，不推 GitHub
 
 | 变量 | 必须 | 说明 |
 |------|------|------|
-| `DASHSCOPE_API_KEY` | ✅ | 通义千问 API |
+| `DASHSCOPE_API_KEY` | ✅ | LLM的 API |
 | `SMTP_USERNAME` | 发邮件时必须 | 邮箱地址 |
 | `SMTP_PASSWORD` | 发邮件时必须 | SMTP 授权码（不是登录密码）|
 | `SMTP_HOST/PORT` | 否 | 邮箱服务器，默认 QQ 邮箱 |

@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual env
+venv/
+.venv/
+env/
+
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log
+
+# Data (local, not pushed)
+data/
+!daily/.gitkeep
+
+# Mac
+.DS_Store
+
+# Daily briefings (pushed via GitHub Actions / publish.py)
+# Don't exclude here — we want them in git

@@ -1,0 +1,84 @@
+name: 📅 Daily AI Core Tech Briefing
+
+on:
+  # 每天北京时间 8:00 自动运行 (= UTC 00:00)
+  schedule:
+    - cron: '0 0 * * *'
+  # 也可以手动触发
+  workflow_dispatch:
+    inputs:
+      date_override:
+        description: '手动指定日期 (YYYY-MM-DD)，留空则用当天'
+        required: false
+        type: string
+
+jobs:
+  generate-briefing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      # ── 1. 拉取代码 ───────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 1
+
+      # ── 2. 安装 Python ──────────────────────────────────────────────
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # ── 3. 安装依赖 ────────────────────────────────────────────────
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # ── 4. 配置环境变量 ─────────────────────────────────────────────
+      - name: Set environment variables
+        run: |
+          echo "DASHSCOPE_API_KEY=${{ secrets.DASHSCOPE_API_KEY }}" >> $GITHUB_ENV
+          echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
+          echo "GITHUB_REPO=${{ github.repository }}" >> $GITHUB_ENV
+        env:
+          DASHSCOPE_API_KEY: ${{ secrets.DASHSCOPE_API_KEY }}
+
+      # ── 5. 运行简报生成 ─────────────────────────────────────────────
+      - name: Generate daily briefing
+        run: |
+          if [ -n "${{ inputs.date_override }}" ]; then
+            # 手动触发时可指定日期（需要修改 main.py 支持日期参数）
+            python main.py
+          else
+            python main.py
+          fi
+
+      # ── 6. 提交简报文件 ─────────────────────────────────────────────
+      - name: Commit and push briefing
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+
+          # 添加今日简报
+          DATE_TODAY=$(date +%Y-%m-%d)
+          FILE_PATTERN="daily/*${DATE_TODAY}*.md"
+
+          if ls $FILE_PATTERN 1> /dev/null 2>&1; then
+            git add $FILE_PATTERN
+            git add INDEX.md 2>/dev/null || true
+            git commit -m "📅 Daily Briefing: ${DATE_TODAY} [CI skip]" || echo "No changes to commit"
+            git push origin ${{ github.ref_name }}
+          else
+            echo "No new briefing files to commit"
+          fi
+
+      # ── 7. 上传当日简报为 artifact ──────────────────────────────────
+      - name: Upload briefing artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-briefing-${{ github.run_number }}
+          path: daily/AI核心技术简报_*.md
+          retention-days: 30

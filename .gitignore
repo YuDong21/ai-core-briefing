@@ -30,5 +30,6 @@ data/
 # Mac
 .DS_Store
 
-# Daily briefings (pushed via GitHub Actions / publish.py)
-# Don't exclude here — we want them in git
+# Daily briefings — generated locally, optionally pushed to GitHub
+/daily/
+*.md

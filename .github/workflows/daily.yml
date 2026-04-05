@@ -43,7 +43,22 @@ jobs:
 
       # ── 5. 运行简报生成 ─────────────────────────────────────────────
       - name: Generate daily briefing
-        run: python main.py
+        env:
+          DASHSCOPE_API_KEY: ${{ secrets.DASHSCOPE_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPO: ${{ github.repository }}
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+        run: |
+          # 将环境变量写入 run.py 配置区（GitHub Actions 环境变量注入方式）
+          sed -i "s/^DASHSCOPE_API_KEY.*/DASHSCOPE_API_KEY: str = \"${DASHSCOPE_API_KEY}\"/" run.py
+          sed -i "s/^GITHUB_TOKEN.*/GITHUB_TOKEN: str = \"${GITHUB_TOKEN}\"/" run.py
+          sed -i "s/^GITHUB_REPO.*/GITHUB_REPO: str = \"${GITHUB_REPO}\"/" run.py
+          sed -i "s/^SMTP_USERNAME.*/SMTP_USERNAME: str = \"${SMTP_USERNAME}\"/" run.py
+          sed -i "s/^SMTP_PASSWORD.*/SMTP_PASSWORD: str = \"${SMTP_PASSWORD}\"/" run.py
+          sed -i "s/recipients:.*/recipients: list[str] = [\"${EMAIL_TO}\"]/" run.py
+          python run.py
 
       # ── 6. 提交简报文件到 GitHub ─────────────────────────────────────
       - name: Commit and push briefing to GitHub

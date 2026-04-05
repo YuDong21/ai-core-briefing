@@ -1,31 +1,7 @@
-# 每日《AI核心技术简报》依赖
-
-# HTTP 请求
+# AI 核心技术简报 · 依赖
 requests>=2.31.0
-httpx>=0.25.0
-
-# ArXiv
 arxiv>=1.4.8
-
-# 网页解析
 beautifulsoup4>=4.12.0
-lxml>=4.9.0
-
-# Embedding & 相似度
-FlagEmbedding>=1.2.10
-numpy>=1.24.0
-
-# LLM（通义千问）
 dashscope>=1.14.0
-
-# GitHub API
 PyGithub>=2.1.1
-
-# 工具
 python-dateutil>=2.8.2
-cachey>=0.2.1
-tiktoken>=0.5.0
-
-# 向量数据库（可选，轻量用 FAISS）
-faiss-cpu>=1.7.4; sys_platform != 'darwin'
-# faiss-cpu 在 Windows 上建议用 conda 安装: conda install -c pytorch faiss-cpu

@@ -49,31 +49,53 @@ export DASHSCOPE_API_KEY="sk-xxxxxxxx"
 
 # GitHub Token（自动推送简报用）
 export GITHUB_TOKEN="ghp_xxxxxx"
+
+# 邮件发送（SMTP 方式，QQ/163/Gmail 均可）
+export SMTP_USERNAME="your_email@example.com"
+export SMTP_PASSWORD="your_smtp_auth_code"   # ⚠️ 不是登录密码，是授权码
+#  QQ邮箱: 设置 → 账户 → POP3/SMTP服务 → 生成授权码
+#  163邮箱: 设置 → POP3/SMTP/SMTP → 开启并获取授权码
+
+# 或者用 SendGrid（更稳定）
+export SENDGRID_API_KEY="SG.xxxx..."
 ```
 
 ### 3. 本地运行
 
 ```bash
-# 生成今日简报
+# 生成今日简报（自动发送邮件）
 python main.py
 
 # 输出: daily/AI核心技术简报_2026-04-05.md
 ```
 
-### 4. GitHub Actions（每天自动运行）
+### 4. GitHub Actions（每天自动运行 + 邮件通知）
 
-在 GitHub 仓库设置 secrets：
-- `DASHSCOPE_API_KEY` — 通义千问 API Key
-- `GITHUB_TOKEN` — 自动提供（无需手动设置）
+在 GitHub 仓库设置 Secrets：
+| Secret 名称 | 说明 |
+|-------------|------|
+| `DASHSCOPE_API_KEY` | 通义千问 API Key |
+| `SMTP_USERNAME` | 发件邮箱（如 `2601082764@qq.com`）|
+| `SMTP_PASSWORD` | SMTP 授权码（不是登录密码）|
+| `EMAIL_TO` | 收件人邮箱（如 `2601082764@qq.com`）|
+| `GITHUB_TOKEN` | 自动提供，无需手动设置 |
 
-Actions 将每天 UTC 00:00（北京时间 8:00）自动运行并推送简报。
+以及 Repository Variables：
+| Variable 名称 | 值 |
+|--------------|---|
+| `SMTP_HOST` | `smtp.qq.com`（QQ邮箱）或 `smtp.163.com` 等 |
+| `SMTP_PORT` | `465`（SSL，推荐）|
+| `EMAIL_FROM_NAME` | `AI 核心技术简报` |
+
+Actions 将每天 UTC 00:00（北京时间 8:00）自动运行并推送简报到 GitHub，同时发送邮件到你的邮箱。
 
 ## 📂 项目结构
 
 ```
 ai-core-briefing/
 ├── main.py                      # ⭐ 主入口
-├── config.py                    # ⭐ 配置中心
+├── config.py                    # ⭐ 配置中心（API/邮件/SMTP）
+├── notifier.py                  # ⭐ 邮件发送（SMTP / SendGrid）
 ├── publish.py                   # GitHub 自动发布
 ├── requirements.txt
 ├── README.md
@@ -149,5 +171,43 @@ max_github_projects = 5
 
 ## 🔒 安全提示
 
-- `DASHSCOPE_API_KEY` 和 `GITHUB_TOKEN` 只放在 GitHub Secrets 中，不要提交到代码
-- `seed_papers.jsonl` 可随时编辑，格式无要求，保持多样性即可
+- 所有 API Key 和密码只放在 GitHub Secrets 中，不要提交到代码
+- SMTP 授权码不是邮箱登录密码，是专用授权码（QQ/163 邮箱均可在线生成）
+- `seed_papers.jsonl` 可随时编辑，保持多样性即可
+
+## 📧 邮件发送配置详解
+
+### 方式一：SMTP（推荐，简单免费）
+
+**QQ 邮箱设置步骤：**
+1. 登录 QQ 邮箱 → 设置 → 账户
+2. 找到「POP3/SMTP服务」→ 开启
+3. 点击「生成授权码」（会发短信验证）
+4. 得到 16 位授权码，填入 `SMTP_PASSWORD`
+
+**GitHub Secrets 设置：**
+| Secret | 值 |
+|--------|-----|
+| `SMTP_USERNAME` | `2601082764@qq.com` |
+| `SMTP_PASSWORD` | `abcdexxxxxxxxxxxx`（授权码）|
+| `EMAIL_TO` | `2601082764@qq.com` |
+
+**Repository Variables：**
+| Variable | 值 |
+|----------|----|
+| `SMTP_HOST` | `smtp.qq.com` |
+| `SMTP_PORT` | `465` |
+
+### 方式二：SendGrid（更稳定，适合生产环境）
+
+1. 注册 https://sendgrid.com（免费 100 封/天）
+2. Settings → API Keys → Create API Key → Full Access
+3. 将 `SENDGRID_API_KEY` 填入 GitHub Secrets
+
+### 本地测试邮件发送
+
+```bash
+export SMTP_USERNAME="2601082764@qq.com"
+export SMTP_PASSWORD="your_auth_code"
+python -c "from notifier import send_email; print(send_email('# Test', '2026-04-05'))"
+```

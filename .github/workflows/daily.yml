@@ -4,18 +4,13 @@ on:
   # 每天北京时间 8:00 自动运行 (= UTC 00:00)
   schedule:
     - cron: '0 0 * * *'
-  # 也可以手动触发
+  # 手动触发
   workflow_dispatch:
-    inputs:
-      date_override:
-        description: '手动指定日期 (YYYY-MM-DD)，留空则用当天'
-        required: false
-        type: string
 
 jobs:
   generate-briefing:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 50
 
     steps:
       # ── 1. 拉取代码 ───────────────────────────────────────────────
@@ -48,21 +43,14 @@ jobs:
 
       # ── 5. 运行简报生成 ─────────────────────────────────────────────
       - name: Generate daily briefing
-        run: |
-          if [ -n "${{ inputs.date_override }}" ]; then
-            # 手动触发时可指定日期（需要修改 main.py 支持日期参数）
-            python main.py
-          else
-            python main.py
-          fi
+        run: python main.py
 
-      # ── 6. 提交简报文件 ─────────────────────────────────────────────
-      - name: Commit and push briefing
+      # ── 6. 提交简报文件到 GitHub ─────────────────────────────────────
+      - name: Commit and push briefing to GitHub
         run: |
           git config --local user.name "github-actions[bot]"
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
 
-          # 添加今日简报
           DATE_TODAY=$(date +%Y-%m-%d)
           FILE_PATTERN="daily/*${DATE_TODAY}*.md"
 
@@ -75,7 +63,29 @@ jobs:
             echo "No new briefing files to commit"
           fi
 
-      # ── 7. 上传当日简报为 artifact ──────────────────────────────────
+      # ── 7. 发送邮件 ─────────────────────────────────────────────────
+      - name: Send briefing via email
+        if: |
+            vars.SMTP_USERNAME != '' && vars.SMTP_PASSWORD != ''
+        uses: appleboy/smtp-action@v0.1.7
+        with:
+          host: ${{ vars.SMTP_HOST || 'smtp.qq.com' }}
+          port: ${{ vars.SMTP_PORT || 465 }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          to: ${{ secrets.EMAIL_TO }}
+          from: ${{ vars.EMAIL_FROM_NAME || 'AI 核心技术简报' }} <${{ secrets.SMTP_USERNAME }}>
+          subject: "🤖 AI 核心技术简报 $(date +%Y-%m-%d)"
+          body: |
+            请在 GitHub 查看完整简报：
+            https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/daily/
+          insecure: false
+          debug: false
+        env:
+          SMTPS_HOST: ${{ vars.SMTP_HOST || 'smtp.qq.com' }}
+          SMTPS_PORT: ${{ vars.SMTP_PORT || '465' }}
+
+      # ── 8. 上传当日简报为 artifact ────────────────────────────────────
       - name: Upload briefing artifact
         uses: actions/upload-artifact@v4
         with:

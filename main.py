@@ -245,6 +245,44 @@ def step_publish(
 
 
 # ---------------------------------------------------------------------------
+# Step 6: 发送邮件
+# ---------------------------------------------------------------------------
+
+def step_send_email(
+    markdown_content: str,
+    date_str: str,
+    arxiv_count: int = 0,
+    github_count: int = 0,
+    blog_count: int = 0,
+    github_url: str = "",
+) -> dict:
+    """发送邮件。"""
+    from notifier import EmailNotifier
+
+    print("\n[Step 6/6] 📧 发送邮件...")
+
+    notifier = EmailNotifier()
+    result = notifier.send_briefing_with_summary(
+        markdown_content=markdown_content,
+        date_str=date_str,
+        arxiv_count=arxiv_count,
+        github_count=github_count,
+        blog_count=blog_count,
+        github_url=github_url,
+    )
+
+    if result.get("status") == "skipped":
+        print(f"  ⚠️  {result.get('message', '未配置邮件发送')}")
+        print("   开启邮件: 设置 SMTP_USERNAME / SMTP_PASSWORD 或 SENDGRID_API_KEY")
+    elif result.get("status") == "sent":
+        print(f"  ✅ 邮件已发送 ({result['method']}): {result['message']}")
+    else:
+        print(f"  ❌ 邮件发送失败: {result.get('message', '未知错误')}")
+
+    return result
+
+
+# ---------------------------------------------------------------------------
 # 主流程
 # ---------------------------------------------------------------------------
 
@@ -283,16 +321,28 @@ def main() -> None:
         date_val, arxiv_results, github_results, blog_results, cfg
     )
 
-    # 5. 发布
-    result = step_publish(content, date_str)
+    # 5. 发布到 GitHub
+    pub_result = step_publish(content, date_str)
+    github_url = pub_result.get("url", "")
+
+    # 6. 发送邮件
+    email_result = step_send_email(
+        markdown_content=content,
+        date_str=date_str,
+        arxiv_count=len(arxiv_results),
+        github_count=len(github_results),
+        blog_count=len(blog_results),
+        github_url=github_url,
+    )
 
     # 最终输出
     print(f"""
 ╔══════════════════════════════════════════════════════╗
 ║  ✅ 简报生成完成！                                    ║
 ║                                                      ║
-║  📄 本地文件: {str(path)[-50]:<50}  ║
-║  🚀 发布状态: {str(result.get('status', 'unknown')):<50}  ║
+║  📄 本地文件 : {str(path)[-48]:<48}  ║
+║  🚀 GitHub   : {str(pub_result.get('status', 'unknown')):<48}  ║
+║  📧 邮件     : {str(email_result.get('status', 'unknown')):<48}  ║
 ╚══════════════════════════════════════════════════════╝
 """)
 

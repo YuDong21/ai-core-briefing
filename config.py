@@ -175,6 +175,50 @@ class BriefingConfig:
 
 
 # ---------------------------------------------------------------------------
+# 邮件发送配置
+# ---------------------------------------------------------------------------
+
+@dataclass
+class EmailConfig:
+    """邮件发送配置。
+
+    支持两种方式：
+      1. SMTP 直接发送（需要邮箱开启 SMTP 服务）
+         - QQ 邮箱: smtp.qq.com   端口 465 (SSL) 或 587 (TLS)
+         - 163 邮箱: smtp.163.com 端口 465 (SSL)
+         - Gmail:   smtp.gmail.com 端口 587 (TLS)
+      2. SendGrid API（更稳定，推荐）
+         - 注册 https://sendgrid.com 免费账号
+    """
+
+    # ── 发送方式 ────────────────────────────────────────────────
+    method: str = "smtp"          # "smtp" 或 "sendgrid"
+
+    # ── 发件人（SMTP）───────────────────────────────────────────
+    smtp_host: str = "smtp.qq.com"
+    smtp_port: int = 465           # SSL 端口（推荐），或 587 (TLS)
+    smtp_ssl: bool = True
+    smtp_username: str = ""       # 你的邮箱地址
+    smtp_password: str = ""       # ⚠️ 不是登录密码，是「授权码」
+    #   QQ 邮箱: 设置 → 账户 → POP3/SMTP服务 → 生成授权码
+    #   163 邮箱: 设置 → POP3/SMTP/SMTP → 开启并获取授权码
+
+    # ── SendGrid 方式 ───────────────────────────────────────────
+    sendgrid_api_key: str = os.getenv("SENDGRID_API_KEY", "")
+
+    # ── 收件人 ─────────────────────────────────────────────────
+    recipients: list[str] = field(default_factory=lambda: ["2601082764@qq.com"])
+    # ── 发件人显示名 ───────────────────────────────────────────
+    from_name: str = "AI 核心技术简报"
+
+    @property
+    def is_configured(self) -> bool:
+        if self.method == "sendgrid":
+            return bool(self.sendgrid_api_key)
+        return bool(self.smtp_username and self.smtp_password)
+
+
+# ---------------------------------------------------------------------------
 # 全局配置
 # ---------------------------------------------------------------------------
 
@@ -186,6 +230,7 @@ def get_config():
         "knowledge_base": KnowledgeBaseConfig(),
         "llm": LLMConfig(),
         "briefing": BriefingConfig(),
+        "email": EmailConfig(),
         "github": {
             "repo": GITHUB_REPO,
             "branch": GITHUB_BRANCH,

@@ -42,9 +42,9 @@ DASHSCOPE_API_KEY: str = "sk-****************************"
 
 # ✅ 邮件发送配置（留空则跳过邮件）
 SMTP_HOST: str = ""   # 邮件服务器地址（SMTP 服务器）
-SMTP_PORT: int = 465  # 邮件服务器的端口号
+SMTP_PORT: int = 123  # 邮件服务器的端口号
 SMTP_USERNAME: str = "123456789@qq.com" # 发件人的邮箱账号（以__名义发邮件）
-SMTP_PASSWORD: str = "twzfqamuuooddjgg" # 邮箱的登录凭证（授权码）
+SMTP_PASSWORD: str = "abcdefghijklmnopqrstuvwxyz" # 邮箱的登录凭证（授权码）
 recipients: list[str] = ["123456789@qq.com"]   # 收件人列表，如 ["you@example.com"]
 
 # ✅ GitHub 发布（留空则跳过）

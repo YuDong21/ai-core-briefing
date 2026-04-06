@@ -37,15 +37,15 @@ from typing import Any
 # 【配置区】— 修改这里即可
 # ══════════════════════════════════════════════════════════════════════════════
 
-# ✅ 通义千问 API（必须）
-DASHSCOPE_API_KEY: str = "sk-1tAw41bUMI17ADEbBOgeyjG5Aq3YArhfE3M8Qb3wwzbuQhGu"
+# ✅ 大语言模型API（必须）
+DASHSCOPE_API_KEY: str = "sk-****************************"
 
 # ✅ 邮件发送配置（留空则跳过邮件）
-SMTP_HOST: str = "smtp.qq.com"
-SMTP_PORT: int = 465
-SMTP_USERNAME: str = "2601082764@qq.com"
-SMTP_PASSWORD: str = "twzfqamuuooddjgg"
-recipients: list[str] = ["2601082764@qq.com"]   # 收件人列表，如 ["you@example.com"]
+SMTP_HOST: str = ""   # 邮件服务器地址（SMTP 服务器）
+SMTP_PORT: int = 465  # 邮件服务器的端口号
+SMTP_USERNAME: str = "123456789@qq.com" # 发件人的邮箱账号（以__名义发邮件）
+SMTP_PASSWORD: str = "twzfqamuuooddjgg" # 邮箱的登录凭证（授权码）
+recipients: list[str] = ["123456789@qq.com"]   # 收件人列表，如 ["you@example.com"]
 
 # ✅ GitHub 发布（留空则跳过）
 GITHUB_TOKEN: str = ""

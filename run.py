@@ -38,14 +38,14 @@ from typing import Any
 # ══════════════════════════════════════════════════════════════════════════════
 
 # ✅ 通义千问 API（必须）
-DASHSCOPE_API_KEY: str = ""
+DASHSCOPE_API_KEY: str = "sk-1tAw41bUMI17ADEbBOgeyjG5Aq3YArhfE3M8Qb3wwzbuQhGu"
 
 # ✅ 邮件发送配置（留空则跳过邮件）
 SMTP_HOST: str = "smtp.qq.com"
 SMTP_PORT: int = 465
-SMTP_USERNAME: str = ""
-SMTP_PASSWORD: str = ""
-recipients: list[str] = []   # 收件人列表，如 ["you@example.com"]
+SMTP_USERNAME: str = "2601082764@qq.com"
+SMTP_PASSWORD: str = "twzfqamuuooddjgg"
+recipients: list[str] = ["2601082764@qq.com"]   # 收件人列表，如 ["you@example.com"]
 
 # ✅ GitHub 发布（留空则跳过）
 GITHUB_TOKEN: str = ""
